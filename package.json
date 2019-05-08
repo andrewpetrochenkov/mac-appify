@@ -1,0 +1,14 @@
+{
+  "name": "mac-appify",
+  "version": "2019.4.13",
+  "description": "create mac app from a shell script",
+  "keywords": [
+    "mac",
+    "app"
+  ],
+  "homepage": "https://github.com/looking-for-a-job/mac-appify",
+  "license": "Unlicense",
+  "bin": {
+    "appify": "./scripts/appify"
+  }
+}

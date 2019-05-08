@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+{ set +x; } 2>/dev/null
+
+usage() {
+    echo "usage: $(basename $0) script app [image]" 1>&2
+    [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; exit
+}
+
+[[ $1 == "-h" ]] || [[ $1 == "--help" ]] && usage "$@"
+
+[[ $# -lt 2 ]] || [[ $# -gt 3 ]] && usage
+
+# path/to/name.app
+# path/to/name.app/Contents/MacOS/script (custom user script)
+# path/to/name.app/Contents/Resources/Icon.icns
+
+# known-issues1: osascript "tell application any ..." hides THIS app
+# known-issues2: app logs not supported
+# known-issues3: `open -a path/to/name.app` not work
+# LSOpenURLsWithRole() failed with error -10810 for the file path/to/name.app
+# fix: idk how fix :(
+
+script="$1"
+app="$2"
+image="$3"
+
+plist="$app"/Contents/Info.plist
+executable="$app"/Contents/MacOS/executable
+icns="$app"/Contents/Resources/Icon.icns
+basename="${app##*/}"
+name="${basename::${#basename}-4}"
+
+! [ -e "$script" ] && echo "ERROR: $script NOT EXISTS" 1>&2 && exit 1
+! [ -s "$script" ] && echo "ERROR: $script EMPTY" && exit 1
+shebang="$(head -n 1 "$script")" || exit
+[[ "$shebang" != "#!"* ]] && echo "ERROR: invalid shebang in file $script
+$shebang" && exit 1
+
+[[ $app != *.app ]] && echo "ERROR: $app
+REQUIRED: .app" 1>&2 && exit 1
+
+! [ -e "$app" ] && { ( set -x; mkdir -p "$app" ) || exit; }
+
+# path/to/name.app/Contents/MacOS/run (custom)
+! [ -e "${executable%/*}" ] && { ( set -x; mkdir -p "${executable%/*}" ) || exit; }
+( set -x; cp "$script" "$executable" ) || exit
+! [ -x "$executable" ] && { ( set -x; chmod +x "$executable" ) || exit; }
+
+# known-issues:
+# Error: Unable to write image to file
+# fix: set valid size (square and less then 256x256)
+# sips -z 128 128 path/to/name.png
+[[ -n "$image" ]] && {
+    ! [ -e "${icns%/*}" ] && { ( set -x; mkdir -p "${icns%/*}" ) || exit; }
+    ( set -x; /usr/bin/sips -s format icns "$image" --out "$icns" ) || exit
+}
+
+set -- \
+-c "Add CFBundleName string '$name'" \
+-c "Add CFBundleExecutable string '${executable##*/}'" \
+-c "Add CFBundleIconFile string 'Icon'"
+[ -e "$plist" ] && echo "SKIP: $plist EXISTS" || {
+    ( set -x; /usr/libexec/PlistBuddy "$@" "$plist" 1> /dev/null ) || exit
+}
+
+# rm .DS_Store
+set --;for path in "$PWD"/.DS_Store "${PWD%/*}"/.DS_Store "${PWD%/*/*}"/.DS_Store; do
+    [ -e "$path" ] && [ -w "${path%/*}" ] && set -- "$@" "$path"
+done
+[[ $# != 0 ]] && { ( set -x; rm -f "$@" ) || exit; }
+# touch
+set --;for path in "$app" "${app%/*}" "${app%/*/*}"; do
+    [ -w "$path" ] && set -- "$@" "$path"
+done
+[[ $# != 0 ]] && { ( set -x; /usr/bin/touch "$@" ) || exit; };:
+
