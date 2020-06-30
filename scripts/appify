@@ -3,10 +3,10 @@
 
 usage() {
     echo "usage: $(basename $0) script app [image]" 1>&2
-    [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; exit
+    [ "$1" = "-h" ] || [ "$1" = "--help" ]; exit
 }
 
-[[ $1 == "-h" ]] || [[ $1 == "--help" ]] && usage "$@"
+[ "$1" = "-h" ] || [ "$1" = "--help" ] && usage "$@"
 
 [[ $# -lt 2 ]] || [[ $# -gt 3 ]] && usage
 
