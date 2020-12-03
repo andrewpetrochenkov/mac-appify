@@ -1,6 +1,6 @@
 {
   "name": "mac-appify",
-  "version": "2019.4.13",
+  "version": "2020.12.3",
   "description": "create mac app from a shell script",
   "keywords": [
     "mac",

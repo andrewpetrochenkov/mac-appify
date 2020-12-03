@@ -4,7 +4,7 @@ https://readme42.com
 
 
 
-[![](https://img.shields.io/badge/OS-Unix-blue.svg?longCache=True)]()
+[![](https://img.shields.io/badge/OS-macOS-blue.svg?longCache=True)]()
 [![](https://img.shields.io/pypi/v/mac-appify.svg?maxAge=3600)](https://pypi.org/project/mac-appify/)
 [![](https://img.shields.io/npm/v/mac-appify.svg?maxAge=3600)](https://www.npmjs.com/package/mac-appify)[![](https://img.shields.io/badge/License-Unlicense-blue.svg?longCache=True)](https://unlicense.org/)
 [![](https://github.com/andrewp-as-is/mac-appify/workflows/tests42/badge.svg)](https://github.com/andrewp-as-is/mac-appify/actions)
